@@ -9,7 +9,6 @@ app.get("/", (_, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Servidor en funcionamiento en el puerto: ${port}`);
+    console.log(`Servidor en funcionamientoo en el puerto: ${port}`);
 });
 
-Array satisfies
