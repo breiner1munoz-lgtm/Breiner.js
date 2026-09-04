@@ -10,8 +10,28 @@ app.use (express.urlencoded({extended:true}))
 //leer archivo
 const sistemaArchivo = require("fs");
 const ruta = require("path");
-
 const rutaArchivo = ruta.join(__dirname, "datos.json");
+
+const multer = require("multer")
+const almacenamiento=multer.diskStorage({
+    destination: (req,file,cb)=>{
+        cb(null,"misImagenes/")
+    },
+    filename:(req,file,cb)=>{
+        const extension = ruta.extname(file.originalname)
+        cb(null,`${Date.now}`)
+    }
+
+
+
+})
+
+const cargar = multer ({storage: almacenamiento})
+
+
+
+
+
 app.get('/', (req, res) => {
     res.send('Aprendicez ficha 3407186');
 });
@@ -40,8 +60,11 @@ app.get('/api/aprendices/:id',(req, res) =>{
 
 //endpoint para crear aprendices
 
-app.post('/api/aprendices',(req, res) =>{
+app.post('/api/aprendices',cargar.single("imagen"),(req, res) =>{
     const datosAprendiz = req.body 
+
+    datosAprendiz.imagen = req.file`/misImagenes/${req.file.filename}`  
+
 
     //leer archivo json
     sistemaArchivo.readFile(rutaArchivo, "utf-8", (error, datos)=>{
