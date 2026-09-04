@@ -1,0 +1,7 @@
+[
+    {"id":1, 
+    "nombre":"Jhonny",
+    "correo": "jhonny@example.com", 
+    "imagen": "/imgenes/mifoto.png",
+    "clave":"abc123"}
+]

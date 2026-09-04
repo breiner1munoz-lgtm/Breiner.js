@@ -1,114 +1,106 @@
-const express = require("express");
-require("dotenv").config();
-
-const app = express();
-
+const { error } = require('console');
+const express = require('express');
+const app= express();
+require('dotenv').config();
 const port = process.env.PUERTO || 3000;
+//middleware para parsear datos del body
+app.use(express.json()) 
+app.use (express.urlencoded({extended:true}))
 
-// ========================================
-// MIDDLEWARE
-// ========================================
+//leer archivo
+const sistemaArchivo = require("fs");
+const ruta = require("path");
 
-// Permite recibir datos en formato JSON
-app.use(express.json());
-
-// Permite recibir datos de formularios
-app.use(express.urlencoded({ extended: true }));
-
-
-// ========================================
-// RUTA PRINCIPAL
-// ========================================
-
-app.get("/", (req, res) => {
-    res.send("Aprendices ficha 3407186");
+const rutaArchivo = ruta.join(__dirname, "datos.json");
+app.get('/', (req, res) => {
+    res.send('Aprendicez ficha 3407186');
 });
 
 
-// ========================================
-// CRUD APRENDICES
-// ========================================
+//endpoint para listar aprendices
+app.get('/api/aprendices', (req , res) => {
+    //leer archivo json
+    sistemaArchivo.readFile(rutaArchivo, "utf-8", (error, datos)=>{
+        if (error){
+            return res.status(500).json({Error: "No se puede leer rutaArchivo, o BD"})
+        }
+        const listaAprendices = JSON.parse(datos)
+        res.status(200).json ({"mensaje":listaAprendices})
+    })
+    
+})
+//endpoint para Listar un aprendiz
 
-// GET - listar aprendices
-app.get("/api/aprendices", (req, res) => {
-    res.json({
-        mensaje: "lista de aprendices"
-    });
-});
+app.get('/api/aprendices/:id',(req, res) =>{
+    res.status(200).json ({
+        "mensaje":"Listar un aprendiz"
+         
+    })
+})
 
+//endpoint para crear aprendices
 
-// POST - crear aprendiz
-app.post("/api/aprendices", (req, res) => {
-    res.status(201).json({
-        mensaje: "crear aprendiz"
-    });
-});
+app.post('/api/aprendices',(req, res) =>{
+    const datosAprendiz = req.body 
 
+    //leer archivo json
+    sistemaArchivo.readFile(rutaArchivo, "utf-8", (error, datos)=>{
+        if (error){
+            return res.status(500).json({Error: "No se puede leer rutaArchivo, o BD"})
+        }
+        const listaAprendices = JSON.parse(datos)
+        //adicionar el nuevo aprendiz a la lista
+        listaAprendices.push(datosAprendiz)
+        sistemaArchivo.writeFile(rutaArchivo,JSON.stringify(listaAprendices, null, 2), (error)=>{
+            if (error){
+            return res.status(500).json({Error: "No se puede escribir en el archivo, o BD"})
+            }
+            res.status(200).json ({"mensaje":"Aprendiz creado", "Datos Aprendiz": datosAprendiz})
+        })
+        
+    })
+    
+})
 
-// PUT - editar aprendiz por ID
-app.put("/api/aprendices/:id", (req, res) => {
-    const { id } = req.params;
+//endpoint para editar aprendices
 
-    res.status(200).json({
-        mensaje: `Editar aprendiz con id ${id}`
-    });
-});
+app.put('/api/aprendices/:id',(req, res) =>{
+    res.status(200).json ({
+        "mensaje":"Editar aprendices"
+         
+    })
+})
 
+//endpoint para Eliminar aprendices
 
-// DELETE - eliminar aprendiz por ID
-app.delete("/api/aprendices/:id", (req, res) => {
-    const { id } = req.params;
+app.delete('/api/aprendices/:id',(req, res) =>{
+    res.status(200).json ({
+        "mensaje":"Eliminar aprendices"
+         
+    })
+})
 
-    res.status(200).json({
-        mensaje: `Eliminar aprendiz con id ${id}`
-    });
-});
-
-
-// ========================================
-// RECIBIR DATOS JSON
-// ========================================
-
-app.post("/rutaJson", (req, res) => {
-
-    const todosDatos = req.body;
-    const edad = Number(req.body.edad2);
-
-    let mensaje;
-
+//
+app.post("/rutaJson", (req, res)=>{
+    const todosDatos =req.body
+    const edad =req.body.Edad
     if (edad >= 18) {
-        mensaje = "es mayor";
-    } else {
-        mensaje = "es menor";
+        res.json({"mensaje":"Es mayor de edad"})
+    }else {
+        res.json({"mensaje":"Es menor"})
     }
+    res.json({datosJson: todosDatos})
+})
 
-    res.json({
-        mensaje: mensaje,
-        datosJson: todosDatos
-    });
-});
+app.post("/rutaFormularios", (req, res)=>{
+    const todosDatos =req.body
+    const programa = req.body.programa
+    
+    res.json({Todosdatos: todosDatos, Mi_Programa: programa})
+})
 
-
-// ========================================
-// RECIBIR DATOS DE FORMULARIO
-// ========================================
-
-app.post("/ruta/formulario", (req, res) => {
-
-    const todosDatos = req.body;
-    const programa = req.body.programa;
-
-    res.json({
-        todosDatos: todosDatos,
-        Miprograma: programa
-    });
-});
-
-
-// ========================================
-// INICIAR SERVIDOR
-// ========================================
 
 app.listen(port, () => {
-    console.log(`Servidor ejecutándose en http://localhost:${port}`);
+    console.log( `Servidor: http://localhost:${port}` );
 });
+
